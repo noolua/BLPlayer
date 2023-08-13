@@ -1,6 +1,7 @@
 #ifndef __access_token_h__
 #define __access_token_h__
 #include "data/prefix.h"
+#include "data/success.h"
 #include "data/d0.h"
 #include "data/d1.h"
 #include "data/d2.h"

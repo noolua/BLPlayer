@@ -562,7 +562,12 @@ void loop() {
   if(button.isReleased() && ts_button_down != 0){
     uint32_t ts_hold = ts_now - ts_button_down;
     ts_button_down = 0;
-    if(ts_hold < 2000){
+    if(ts_hold < 1000){
+      memset(digital_token, 0, sizeof(digital_token));
+      strcpy(digital_token, "xs");
+      digital_token[sizeof(digital_token)-1] = 0;
+      digital_token_sz = strlen("xs");
+      Serial.printf("local sound effect: %s\n", digital_token);
     }else if(ts_hold < 3000){
       Serial.println("nothing to do ...");
     }else{

@@ -57,6 +57,7 @@ bool AudioFileDigitalTokens::open(const char *tokens) {
       case '7': { n->_data = d7_aac; n->_data_sz = sizeof(d7_aac);  _size += n->_data_sz; } break;
       case '8': { n->_data = d8_aac; n->_data_sz = sizeof(d8_aac);  _size += n->_data_sz; } break;
       case '9': { n->_data = d9_aac; n->_data_sz = sizeof(d9_aac);  _size += n->_data_sz; } break;
+      case 's': { n->_data = success_aac; n->_data_sz = sizeof(success_aac);  _size += n->_data_sz; } break;
       case 'x':
       default: { n->_data = dd_aac; n->_data_sz = sizeof(dd_aac);  _size += n->_data_sz; } break;
     }

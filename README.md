@@ -5,6 +5,9 @@
 ## 演示视频
  - 正在制作 ...
 
+## 大致框图
+<img src="./misc/block_diagram.png" alt="Alt Text" width="800"/>
+
 ## 特点
 
 - 硬件需求: 一个蓝牙音箱（蓝牙耳机）+ 一块ESP32开发板。

@@ -138,8 +138,10 @@ retry:
     if(chunk_status == CHUNK_COMPLETE){
       return 0;
     }else if(chunk_status == CHUNK_SIZE){
-      char buffer[32];
+      char buffer[64];
       int idx = 0;
+PARSE_CHUNK_SIZE:
+      /*seek CRLF*/
       while(stream->read(reinterpret_cast<uint8_t*>(&buffer[idx]), 1)){
         if(buffer[idx] == '\n'){
           break;
@@ -147,15 +149,20 @@ retry:
         idx++;
       }
       if(idx > 0){
-        // Serial.printf("buffer: %s\n", buffer);
         buffer[idx-1] = 0;
+        // Serial.printf("buffer: %s, idx: %d\n", buffer, idx);
         chunk_size = strtol(buffer, NULL, 16);
         chunk_filled = 0;
         chunk_status = CHUNK_PAYLOAD;
-        if(chunk_size == 0){
+        if(chunk_size == 0 && idx > 1){
           // Serial.println("CHUNKED 00000, END");
           chunk_status = CHUNK_COMPLETE;
           return 0;
+        }else if(chunk_size == 0 && idx == 1){
+          /* golang http-chunk, may use 'empty-CRLF' */
+          // Serial.println("CHUNKED, CONTINUUUUUUUUUUUUUUUUUUUUUUUE");
+          idx = 0;
+          goto PARSE_CHUNK_SIZE;
         }else{
           // Serial.printf("CURR_CHUNKED : %u\n", chunk_size);
         }

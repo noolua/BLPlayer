@@ -34,6 +34,9 @@ class XNetController{
   XNetController(){}
   ~XNetController(){}
   public:
+  
+  // 返回设备boot后的毫秒数
+  static uint64_t millis();
   // 返回毫秒级的utc时间戳
   static uint64_t utc();
   // 初始化

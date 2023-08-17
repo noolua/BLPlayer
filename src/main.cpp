@@ -22,6 +22,9 @@
 #include "mcumon.h"
 #include "UDPMessageController.h"
 
+#undef millis
+#define millis XNetController::millis
+
 class AudioFileSourceBufferV2: public AudioFileSourceBuffer{
   public:
   AudioFileSourceBufferV2(AudioFileSource *in, uint32_t bufferBytes):AudioFileSourceBuffer(in, bufferBytes){}
@@ -293,7 +296,7 @@ class A2DSourceOutput : public AudioOutput
   protected:
     Frame _frames[FRAME_SZ];
     int32_t _pushed, _poped;
-    uint32_t _ts_begin, _ts_poped, _ts_wait_full;
+    uint64_t _ts_begin, _ts_poped, _ts_wait_full;
     bool _paused, _begined;
 };
 
@@ -336,7 +339,7 @@ static void a2dp_match_best_reset(){
 static bool a2dp_match_best_signal_device_cb(const char *name, esp_bd_addr_t address, int rrsi){
   bool found = false;
   a2dp_match_ctx_t *ctx = &_a2dp_match;
-  uint32_t ts_now = millis();
+  uint64_t ts_now = millis();
   
   if(ctx->_max_db < rrsi && strncmp(ESP32_SOURCE_NAME, name, strlen(ESP32_SOURCE_NAME)) != 0){
     if(ctx->_timeout == 0){
@@ -362,7 +365,8 @@ static AudioGenerator *audio_aac;
 static AudioFileSource *file;
 static AudioFileSource *srcbuffer;
 static char audio_url[1024] = {0};
-static uint32_t audio_url_expired = 0, digital_token_sz = 0;
+static uint64_t audio_url_expired = 0;
+static uint32_t digital_token_sz = 0;
 static char digital_token[32] = {0};
 
 static int main_xnet_message_handler(const xnet_message_t *msg){
@@ -396,7 +400,7 @@ static int main_xnet_message_handler(const xnet_message_t *msg){
   return 0;
 }
 
-static uint32_t _ts_last_loop_tick = 0;
+static uint64_t _ts_last_loop_tick = 0;
 static hw_timer_t *Timer0_Cfg = NULL;
 static void IRAM_ATTR app_health_checker(){
   int64_t ticks = esp_timer_get_time()/1000;
@@ -406,7 +410,7 @@ static void IRAM_ATTR app_health_checker(){
 }
 
 static void yield_wait(uint32_t ms){
-  uint32_t expired = millis() + ms;
+  uint64_t expired = millis() + ms;
   while(expired > millis()){
     yield();
   }
@@ -448,7 +452,7 @@ void setup()
     .device_info = improv_device_info
   };
 
-  uint32_t ts_expired = 0;
+  uint64_t ts_expired = 0;
   Serial.begin(115200);
   delay(2000);
   NVSetting::load_setting();
@@ -530,10 +534,10 @@ void setup()
 }
 
 void loop() {
-  static uint32_t ts_button = 0, ts_button_down = 0, ts_for_next_music = 0, ts_for_utc = 0, ts_wifi_check = 0;
-  static uint32_t ts_auto_digital = 0;
+  static uint64_t ts_button = 0, ts_button_down = 0, ts_for_next_music = 0, ts_for_utc = 0, ts_wifi_check = 0;
+  static uint64_t ts_auto_digital = 0;
 
-  uint32_t ts_now = millis();
+  uint64_t ts_now = millis();
   _ts_last_loop_tick = ts_now;
   __monitor.loop();
   XNetController::loop();

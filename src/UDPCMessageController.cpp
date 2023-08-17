@@ -77,7 +77,7 @@ typedef struct xnet_runtime_t{
   IPAddress _svr_addr;
   uint16_t _svr_port;
   xnet_message_handler_cb_t _handler;
-  uint32_t _ts_next_query;
+  uint64_t _ts_next_query;
   uint64_t _utc_timestamp_ms;            // 毫秒精度的utc
 }xnet_runtime_t;
 
@@ -104,7 +104,7 @@ void XNetController::setup(xnet_message_handler_cb_t handler){
 }
 
 void XNetController::loop(){
-  uint32_t ts_now = millis();
+  uint64_t ts_now = XNetController::millis();
   int cb = _xnet._svr_udp.parsePacket();
   if(cb > 0){
     cb = _xnet._svr_udp.read(_xnet._buffer, MAX_XNET_FRAME);
@@ -115,14 +115,7 @@ void XNetController::loop(){
           _xnet._handler(&entity->_message);
         }
         if(entity->_message._opcode == XNET_ACK_TIMESTAMP && entity->_message._payload_sz == sizeof(uint64_t)){
-          _xnet._utc_timestamp_ms = *(uint64_t*)entity->_message._payload - millis();
-          // uint32_t l32, h32;
-          // l32 = *(uint32_t*)entity->_message._payload;
-          // h32 = *(uint32_t*)(entity->_message._payload+4);
-          // Serial.printf("update _utc_timestamp_ms %08x, %08x\n", l32, h32);
-          // _xnet._utc_timestamp_ms =  (uint64_t)l32 | (uint64_t)h32 << 32;
-          // _xnet._utc_timestamp_ms -= millis();
-          
+          _xnet._utc_timestamp_ms = *(uint64_t*)entity->_message._payload - XNetController::millis();
         }
       }else{
         Serial.println("ERROR entity->verify");
@@ -160,5 +153,9 @@ void XNetController::req_digital_access(){
 }
 
 uint64_t XNetController::utc(){
-  return millis() + _xnet._utc_timestamp_ms;
+  return (esp_timer_get_time() / 1000ULL) + _xnet._utc_timestamp_ms;
+}
+
+uint64_t XNetController::millis(){
+  return esp_timer_get_time() / 1000ULL;
 }

@@ -455,6 +455,7 @@ void setup()
   Serial.begin(115200);
   delay(2000);
   NVSetting::load_setting();
+  /*
   if(NVSetting::get_erase_on_boot()){
     nvs_flash_erase();
     Serial.println("nvs_flash_erase on boot ... ");
@@ -469,7 +470,7 @@ void setup()
     }
     NVSetting::set_erase_on_boot(0);
   }
-
+  */
   ImprovSerial::begin(&cb);
 
   __monitor.loop();
@@ -575,9 +576,14 @@ void loop() {
       Serial.printf("local sound effect: %s\n", digital_token);
     }else if(ts_hold < 3000){
       Serial.println("nothing to do ...");
-    }else{
+    }else if(ts_hold < 10000){
       XNetController::req_digital_access();
       Serial.println("refresh access token ...");
+    }else if(ts_hold > 20000){
+      nvs_flash_erase();
+      Serial.println("nvs_flash_erase on boot ... ");
+      delay(1000);
+      ESP.restart();
     }
   }
   if(ts_auto_digital == 0) 

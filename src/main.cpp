@@ -519,6 +519,8 @@ void setup()
     XNetController::req_utc();
     XNetController::loop();
   }
+  #else
+  WiFi.setSleep(false);
   #endif // ESP32_A2DP_SOURCE
 
 
@@ -619,14 +621,16 @@ void loop() {
       const char *ext = file_ext(audio_url);
       if(ext){
         file = new MyHttpFileSource(audio_url);
-        srcbuffer =  new MyAudioFileSourceBuffer(file, 8192);
+#if ESP32_A2DP_SOURCE
+        srcbuffer =  new MyAudioFileSourceBuffer(file, 1024*16);
+#else
+        srcbuffer =  new MyAudioFileSourceBuffer(file, 1024*64);
+#endif
         if(strcmp(ext, "mp3") == 0){
           audio_aac = new AudioGeneratorMP3();
         }else if(strcmp(ext, "aac") == 0){
           audio_aac = new MyAudioGenerator();
         }else if(strcmp(ext, "bba") == 0){
-          // srcbuffer = new BLBL2AACFileSource((MyAudioFileSourceBuffer*)srcbuffer);
-          // audio_aac = new MyAudioGenerator();
           audio_aac = new MyAudioGenerator();
 
           Serial.println("BLBL Audio");

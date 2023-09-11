@@ -118,7 +118,7 @@ retry:
 
   if (!nonBlock) {
     int start = millis();
-    while ((stream->available() < (int)len) && (millis() - start < 500)) yield();
+    while ((stream->available() < (int)len) && (millis() - start < 3500)) yield();
   }
 
   size_t avail = stream->available();

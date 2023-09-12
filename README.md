@@ -16,10 +16,10 @@
 
 ## 大致框图
  - ### 单一播放单元框图
-<img src="./misc/one_unit.png" alt="Alt Text" width="800"/>
+ - - <img src="./misc/one_unit.png" alt="Alt Text" width="800"/>
  
  - ### 全屋播放单元框图
-<img src="./misc/block_diagram.png" alt="Alt Text" width="800"/>
+ - - <img src="./misc/block_diagram.png" alt="Alt Text" width="800"/>
 
 ## 特点
 
@@ -70,6 +70,10 @@
 ## 重置开发板数据
   - 方式一：使用浏览器重刷固件可以重置esp32保存的Wi-Fi和蓝牙设备数据。
   - 方式二：在esp32上电后，按住boot按钮20秒以上再松开，也可以重置Wi-Fi和蓝牙设备数据。  
+
+## 操作界面
+ - ### 手机上的界面
+  - - <img src="./misc/screenshot.png" alt="Alt Text" width="400"/>
 
 ## 贡献
 

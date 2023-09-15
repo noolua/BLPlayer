@@ -431,6 +431,7 @@ static const char *file_ext(const char *filename){
   return dot + 1;  
 }
 
+static uint64_t wait_improv_timeout = 0;
 
 static int improv_wifi_begin(const char *ssid, const char *passwd) {
   WiFi.disconnect();
@@ -503,7 +504,6 @@ void setup()
     ESP.restart();
   }else{
     Serial.println("Connected");
-    ImprovSerial::stop();
   }
 
   XNetController::setup(main_xnet_message_handler);
@@ -540,6 +540,7 @@ void setup()
 
   auto_refresh_digital_token = NVSetting::get_fresh_digital();
   Serial.printf("auto_refresh_digital_token:  %d\n", auto_refresh_digital_token);
+  wait_improv_timeout = millis() + 20000;
 }
 
 void loop() {
@@ -550,6 +551,12 @@ void loop() {
   _ts_last_loop_tick = ts_now;
   __monitor.loop();
   XNetController::loop();
+  
+  // stop improv
+  if(wait_improv_timeout != 0 && wait_improv_timeout < ts_now){
+    wait_improv_timeout = 0;
+    ImprovSerial::stop();
+  }
 
   if(ts_wifi_check < ts_now){
     ts_wifi_check = ts_now + 90000;

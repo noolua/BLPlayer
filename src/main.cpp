@@ -165,10 +165,17 @@ bool NVSetting::need_commit = false;
 
 #ifdef CONFIG_IDF_TARGET_ESP32
 #define BOOT_PIN        (15)
-#define I2S_SDA         22
-#define I2S_BCK         26
-#define I2S_LRCLK       25
+#define I2S_BCK         25
+#define I2S_LRCLK       26
+#define I2S_SDA         27
 #endif // CONFIG_IDF_TARGET_ESP32
+
+#ifdef CONFIG_IDF_TARGET_ESP32S3
+#define BOOT_PIN        (0)
+#define I2S_BCK         39
+#define I2S_LRCLK       40
+#define I2S_SDA         41
+#endif // CONFIG_IDF_TARGET_ESP32S3
 
 
 #define OUTPUT_SETPIN(x) do{x.SetPinout(I2S_BCK, I2S_LRCLK, I2S_SDA); x.SetLsbJustified(true);}while(0)
@@ -628,7 +635,7 @@ void loop() {
       if(ext){
         file = new MyHttpFileSource(audio_url);
 #if ESP32_A2DP_SOURCE
-        srcbuffer =  new MyAudioFileSourceBuffer(file, 1024*16);
+        srcbuffer =  new MyAudioFileSourceBuffer(file, 1024*8);
 #else
         srcbuffer =  new MyAudioFileSourceBuffer(file, 1024*64);
 #endif

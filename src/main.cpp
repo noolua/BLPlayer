@@ -7,6 +7,7 @@
 #include <nvs_flash.h>
 #include <esp_log.h>
 
+#include "version.h"
 #include "wifi_config.h"
 #include "AudioFileSourcePROGMEM.h"
 #include "AudioFileSourceHTTPStreamEx.h"
@@ -474,6 +475,7 @@ void setup()
   uint64_t ts_expired = 0;
   Serial.begin(115200);
   delay(2000);
+  Serial.printf("version: %s, build: %s\n", BUILD_VERSION, BUILD_TIME);
   NVSetting::load_setting();
   /*
   if(NVSetting::get_erase_on_boot()){

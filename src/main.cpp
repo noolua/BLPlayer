@@ -157,10 +157,18 @@ bool NVSetting::need_commit = false;
 #include "AudioOutputI2S.h"
 
 #ifdef CONFIG_IDF_TARGET_ESP32C3
-#define BOOT_PIN    (9)
-#define I2S_BCK         0
-#define I2S_LRCLK       1
-#define I2S_SDA         12
+#define BOOT_PIN        (9)
+#ifdef ESPGJOYMODEL
+  #define I2S_BCK         12
+  #define I2S_LRCLK       13
+  #define I2S_SDA         1
+  #define TFT_RST         10
+#else
+  #define I2S_BCK         0
+  #define I2S_LRCLK       1
+  #define I2S_SDA         12
+#endif
+
 #endif // CONFIG_IDF_TARGET_ESP32C3
 
 #ifdef CONFIG_IDF_TARGET_ESP32
@@ -177,8 +185,11 @@ bool NVSetting::need_commit = false;
 #define I2S_SDA         41
 #endif // CONFIG_IDF_TARGET_ESP32S3
 
-
+#ifdef ESPGJOYMODEL
+#define OUTPUT_SETPIN(x) do{x.SetPinout(I2S_BCK, I2S_LRCLK, I2S_SDA); pinMode(TFT_RST, OUTPUT); delay(100); digitalWrite(TFT_RST, HIGH);}while(0)
+#else
 #define OUTPUT_SETPIN(x) do{x.SetPinout(I2S_BCK, I2S_LRCLK, I2S_SDA); x.SetLsbJustified(true);}while(0)
+#endif
 
 class MyAudioOutput: public AudioOutputI2S{
   public:

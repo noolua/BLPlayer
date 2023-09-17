@@ -14,6 +14,13 @@
 #if ARDUINO_ARCH_RP2040
 #define esp_get_free_heap_size()  rp2040.getFreeHeap()
 #endif
+#ifdef HAVE_USE_MCUMON
+#define Serial_printf   Serial.printf
+#define Serial_print    Serial.print
+#else
+#define Serial_printf   (void)
+#define Serial_print    (void)
+#endif
 
 class Ticker{
 protected:
@@ -112,7 +119,6 @@ public:
     return found;
   }
   void loop(){
-    #ifdef HAVE_USE_MCUMON
     bool ok = false;
     uint32_t ms_now = millis();
     tft_freq.check_next(ms_now);
@@ -125,19 +131,18 @@ public:
     if(ok){
       uint32_t free_heap_size = esp_get_free_heap_size();
       char message[128];
-      Serial.printf("T:%8.1f, F:%2dHz, U:%4.1f%%, M:%5.1fKB", ms_now/1000.0f, tft_freq.freq(), (1000 - cpu_freq.freq())/10.0, free_heap_size/1024.0);
+      Serial_printf("T:%8.1f, F:%2dHz, U:%4.1f%%, M:%5.1fKB", ms_now/1000.0f, tft_freq.freq(), (1000 - cpu_freq.freq())/10.0, free_heap_size/1024.0);
       for(int i=0; i < MAX_REGISTER; i++){
         monitor_message_reg_t *reg = &_registers[i];
         if(reg->type == OBJ_CB){
           int formated = (reg->method.obj->*(reg->method.obj_cb))(message, sizeof(message));
-          if(formated > 0) Serial.print(message);
+          if(formated > 0) Serial_print(message);
         }else if(reg->type == GLOBAL_CB){
           int formated = reg->method.cb(reg->method.user_data, message, sizeof(message));
-          if(formated > 0) Serial.print(message);
+          if(formated > 0) Serial_print(message);
         }
       }
-      Serial.print("\n");
+      Serial_print("\n");
     }
-    #endif // HAVE_USE_MCUMON
   }
 };

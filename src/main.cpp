@@ -274,7 +274,7 @@ class A2DSourceOutput : public AudioOutput
       float audio_freq = (_poped-_ts_poped) / (ts_timeout/1000.0f);
       if(audio_freq < 32000 && _pushed - _poped < 512 && _begined == true){
         _ts_wait_full = millis() + 1000;
-        Serial.printf(" _ts_wait_full 1second ... ");
+        Serial.printf(" _ts_wait_fill_samples 1second ... ");
       }
       return snprintf(message, message_len, ", audio: (%5.0fhz, %4d)", audio_freq, _pushed - _poped);
     }
@@ -371,7 +371,7 @@ static AudioGenerator *audio_aac;
 static AudioFileSource *file;
 static AudioFileSource *srcbuffer;
 static char audio_url[1024] = {0};
-static uint64_t audio_url_expired = 0;
+static uint64_t audio_url_expired = 0, _last_udp_msg_timestamp = 0;
 static uint32_t digital_token_sz = 0;
 static char digital_token[32] = {0};
 
@@ -403,14 +403,15 @@ static int main_xnet_message_handler(const xnet_message_t *msg){
     }
     break;
   }
+  _last_udp_msg_timestamp = millis();
   return 0;
 }
 
 static uint64_t _ts_last_loop_tick = 0;
 static hw_timer_t *Timer0_Cfg = NULL;
 static void IRAM_ATTR app_health_checker(){
-  int64_t ticks = esp_timer_get_time()/1000;
-  if(ticks - _ts_last_loop_tick > 10000){
+  uint64_t ticks = millis();
+  if(ticks - _ts_last_loop_tick > 10000 || ticks - _last_udp_msg_timestamp > 120000){
     ESP.restart();
   }
 }

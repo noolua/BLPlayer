@@ -173,10 +173,10 @@ bool NVSetting::need_commit = false;
 #endif // CONFIG_IDF_TARGET_ESP32C3
 
 #ifdef CONFIG_IDF_TARGET_ESP32
-#define BOOT_PIN        (15)
-#define I2S_BCK         25
-#define I2S_LRCLK       26
-#define I2S_SDA         27
+#define BOOT_PIN        (23)
+#define I2S_BCK         15
+#define I2S_LRCLK       2
+#define I2S_SDA         4
 #endif // CONFIG_IDF_TARGET_ESP32
 
 #ifdef CONFIG_IDF_TARGET_ESP32S3
@@ -420,10 +420,9 @@ static int main_xnet_message_handler(const xnet_message_t *msg){
 }
 
 static uint64_t _ts_last_loop_tick = 0;
-static hw_timer_t *Timer0_Cfg = NULL;
 static void IRAM_ATTR app_health_checker(){
   uint64_t ticks = millis();
-  if(ticks - _ts_last_loop_tick > 10000 || ticks - _last_udp_msg_timestamp > 120000){
+  if(ticks - _ts_last_loop_tick > 60000 || ticks - _last_udp_msg_timestamp > 120000){
     ESP.restart();
   }
 }
@@ -545,16 +544,19 @@ void setup()
   WiFi.setSleep(false);
   #endif // ESP32_A2DP_SOURCE
 
-
-  Timer0_Cfg = timerBegin(0, 80, true);
-  timerAttachInterrupt(Timer0_Cfg, &app_health_checker, true);
-  timerAlarmWrite(Timer0_Cfg, 1000000, true);
-  timerAlarmEnable(Timer0_Cfg);
+  // install app-check-timer
+  hw_timer_t *timer = timerBegin(0, 80, true);
+  timerAttachInterrupt(timer, &app_health_checker, true);
+  timerAlarmWrite(timer, 1000000, true);
+  timerAlarmEnable(timer);
+  timerRestart(timer);
   _ts_last_loop_tick = millis();
 
   auto_refresh_digital_token = NVSetting::get_fresh_digital();
   Serial.printf("auto_refresh_digital_token:  %d\n", auto_refresh_digital_token);
-  wait_improv_timeout = millis() + 20000;
+  
+  // reserve some time to change wifi, if need.
+  wait_improv_timeout = millis() + 60000;
 }
 
 void loop() {
@@ -596,14 +598,16 @@ void loop() {
   if(button.isReleased() && ts_button_down != 0){
     uint32_t ts_hold = ts_now - ts_button_down;
     ts_button_down = 0;
-    if(ts_hold < 1000){
+    if(ts_hold < 200){
+      Serial.println("nothing to do 0 ...");
+    }else if(ts_hold < 1500){
       memset(digital_token, 0, sizeof(digital_token));
       strcpy(digital_token, "xs");
       digital_token[sizeof(digital_token)-1] = 0;
       digital_token_sz = strlen("xs");
       Serial.printf("local sound effect: %s\n", digital_token);
     }else if(ts_hold < 3000){
-      Serial.println("nothing to do ...");
+      Serial.println("nothing to do 1 ...");
     }else if(ts_hold < 10000){
       XNetController::req_digital_access();
       Serial.println("refresh access token ...");

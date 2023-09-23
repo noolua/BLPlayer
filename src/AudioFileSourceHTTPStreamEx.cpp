@@ -157,6 +157,7 @@ PARSE_CHUNK_SIZE:
         if(chunk_size == 0 && idx > 1){
           // Serial.println("CHUNKED 00000, END");
           chunk_status = CHUNK_COMPLETE;
+          size = pos;
           return 0;
         }else if(chunk_size == 0 && idx == 1){
           /* golang http-chunk, may use 'empty-CRLF' */

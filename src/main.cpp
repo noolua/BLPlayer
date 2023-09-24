@@ -10,7 +10,8 @@
 #include "version.h"
 #include "wifi_config.h"
 #include "AudioFileSourcePROGMEM.h"
-#include "AudioFileSourceHTTPStreamEx.h"
+#include "AudioFileSourceHTTPStreamV2.h"
+// #include "AudioFileSourceHTTPStreamEx.h"
 #include "AudioFileSourceHTTPStream.h"
 #include "AudioFileSourceBufferEx.h"
 #include "AudioFileSourceBuffer.h"
@@ -36,11 +37,9 @@ class AudioFileSourceBufferV2: public AudioFileSourceBuffer{
   }
 };
 
-// typedef AudioFileSourceBufferEx     MyAudioFileSourceBuffer;
-// typedef AudioFileSourceHTTPStreamEx MyHttpFileSource;
-
 typedef AudioFileSourceBufferEx       MyAudioFileSourceBuffer;
-typedef AudioFileSourceHTTPStreamEx   MyHttpFileSource;
+// typedef AudioFileSourceHTTPStreamEx   MyHttpFileSource;
+typedef AudioFileSourceHTTPStreamV2   MyHttpFileSource;
 
 
 McuMonitor __monitor;
@@ -662,7 +661,7 @@ void loop() {
 #if ESP32_A2DP_SOURCE
         srcbuffer =  new MyAudioFileSourceBuffer(file, 1024*8);
 #else
-        srcbuffer =  new MyAudioFileSourceBuffer(file, 1024*64);
+        srcbuffer =  new MyAudioFileSourceBuffer(file, 1024*16);
 #endif
         if(strcmp(ext, "mp3") == 0){
           audio_aac = new AudioGeneratorMP3();

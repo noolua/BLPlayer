@@ -133,9 +133,12 @@ uint32_t AudioFileSourceBufferEx::read(void *data, uint32_t len)
 
 void AudioFileSourceBufferEx::fill()
 {
+  int window_sz = 1024;
+  if(buffSize >= 8192)
+    window_sz = 4096;
   if (!buffer) return;
 
-  if (length < buffSize) {
+  if (length < buffSize && (buffSize - length) > window_sz ) {
     // Now try and opportunistically fill the buffer
     if (readPtr > writePtr) {
       if (readPtr == writePtr+1) return;
@@ -168,12 +171,15 @@ void AudioFileSourceBufferEx::fill()
 bool AudioFileSourceBufferEx::loop()
 {
   if (!src->loop()) return false;
+  /*
   int times = 6;
   while(length < buffSize && times--){
     esp_rom_delay_us(100);
     fill();
     yield();
   }
+  */
+  fill();
   return true;
 }  
 

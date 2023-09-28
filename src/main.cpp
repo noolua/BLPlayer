@@ -651,6 +651,7 @@ void loop() {
       digital_token_sz = 0;
       file = new AudioFileDigitalTokens(digital_token);
       srcbuffer =  new MyAudioFileSourceBuffer(file, 2048);
+      __monitor.register_monitor_message(srcbuffer, (obj_monitor_message_cb)&MyAudioFileSourceBuffer::monitor_message);
       audio_aac = new MyAudioGenerator();
       audio_aac->begin(srcbuffer, &output);
     }else if(strncmp(audio_url, "http://", strlen("http://")) == 0 || strncmp(audio_url, "https://", strlen("https://")) == 0){
@@ -661,8 +662,9 @@ void loop() {
 #if ESP32_A2DP_SOURCE
         srcbuffer =  new MyAudioFileSourceBuffer(file, 1024*8);
 #else
-        srcbuffer =  new MyAudioFileSourceBuffer(file, 1024*16);
+        srcbuffer =  new MyAudioFileSourceBuffer(file, 1024*96);
 #endif
+        __monitor.register_monitor_message(srcbuffer, (obj_monitor_message_cb)&MyAudioFileSourceBuffer::monitor_message);
         if(strcmp(ext, "mp3") == 0){
           audio_aac = new AudioGeneratorMP3();
         }else if(strcmp(ext, "aac") == 0){

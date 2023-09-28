@@ -9,6 +9,8 @@
 #include "AudioFileSource.h"
 #include <esp_http_client.h>
 
+#define RX_BUFFER_SZ    (4096)
+
 class AudioFileSourceHTTPStreamV2 : public AudioFileSource {
   public:
     AudioFileSourceHTTPStreamV2(const char *url);

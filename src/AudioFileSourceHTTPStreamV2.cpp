@@ -18,8 +18,8 @@ AudioFileSourceHTTPStreamV2::~AudioFileSourceHTTPStreamV2(){
 bool AudioFileSourceHTTPStreamV2::open(const char *url){
   esp_http_client_config_t config = {
     .url = url,
-    .timeout_ms = 15000,      // connect timeout 15 seconds
-    .buffer_size = 4096,      // recv buffer > mtu ~ 1500 bytes
+    .timeout_ms = 25000,            // connect timeout 25 seconds
+    .buffer_size = RX_BUFFER_SZ,    // recv buffer > mtu ~ 1500 bytes
     .is_async = true,
   };
   _client = esp_http_client_init(&config);
@@ -53,6 +53,8 @@ uint32_t AudioFileSourceHTTPStreamV2::read(void *data, uint32_t len){
   int read = -1;
   if(_client){
     esp_http_client_set_timeout_ms(_client, 5000);
+    if (len > RX_BUFFER_SZ)
+      len = RX_BUFFER_SZ;
     read = esp_http_client_read(_client, (char *)data, (int)len);
   }
   if(read == -1){
@@ -67,6 +69,8 @@ uint32_t AudioFileSourceHTTPStreamV2::readNonBlock(void *data, uint32_t len){
   int read = -1;
   if(_client){
     esp_http_client_set_timeout_ms(_client, 1);
+    if (len > RX_BUFFER_SZ)
+      len = RX_BUFFER_SZ;
     read = esp_http_client_read(_client, (char *)data, (int)len);
   }
   if(read == -1){

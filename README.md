@@ -3,8 +3,8 @@
 使用ESP32系列开发板，连接蓝牙音箱，播放bilibili.com音频流，打造全屋背景音乐。
 
 ## 演示视频
- - ## https://www.bilibili.com/video/BV1FV411A7cp/
- - <img src="./misc/video.jpg" alt="Alt Text" width="480"/>
+ - ## [《ESP32开发板配合蓝牙音箱，DIY全屋音乐，安装教程》](https://www.bilibili.com/video/BV1FV411A7cp/)
+ - [<img src="./misc/video.jpg"  alt="Alt Text" width="480">](https://www.bilibili.com/video/BV1FV411A7cp/)
 
 ## 背景
  - 大部分ESP32开发板的板载内存非常有限，在上电后大概有260KB的可用内存。在开启蓝牙连接和Wi-Fi功能后，内存就已经消耗掉150KB左右。B站的大部分视频中的音频数据流是m4a封装的AAC-LC格式。使用开发板将https的数据流下载回来，进行实时转码，再AAC解码播放，非常容易触发OOM, 导致ESP32重启。这个应用是将B站音频下载、转码做成局域网内的独立服务程序，ESP32通过http方式实时播放转码后的AAC音频数据。
@@ -79,7 +79,9 @@
 
 ## 贡献
 
-## 感谢
+## 致谢
+  - https://github.com/SocialSisterYi/bilibili-API-collect
+  - https://github.com/nilaoda/BBDown
   - https://github.com/pschatzmann/ESP32-A2DP
   - https://github.com/earlephilhower/ESP8266Audio
   - https://esphome.github.io/esp-web-tools/

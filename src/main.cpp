@@ -11,10 +11,7 @@
 #include "wifi_config.h"
 #include "AudioFileSourcePROGMEM.h"
 #include "AudioFileSourceHTTPStreamV2.h"
-// #include "AudioFileSourceHTTPStreamEx.h"
-#include "AudioFileSourceHTTPStream.h"
 #include "AudioFileSourceBufferEx.h"
-#include "AudioFileSourceBuffer.h"
 #include "AudioFileDigitalTokens.h"
 #include "AudioGeneratorAAC.h"
 #include "AudioGeneratorMP3.h"
@@ -27,18 +24,7 @@
 #undef millis
 #define millis XNetController::millis
 
-class AudioFileSourceBufferV2: public AudioFileSourceBuffer{
-  public:
-  AudioFileSourceBufferV2(AudioFileSource *in, uint32_t bufferBytes):AudioFileSourceBuffer(in, bufferBytes){}
-  int monitor_message(char *message, int message_len){
-    return snprintf(message, message_len, ", stream: (%uKB, %5u)", 0/1024, 0);
-    // return snprintf(message, message_len, ", stream: (%uKB, %5u)", buffSize/1024, length);
-    return 0;
-  }
-};
-
 typedef AudioFileSourceBufferEx       MyAudioFileSourceBuffer;
-// typedef AudioFileSourceHTTPStreamEx   MyHttpFileSource;
 typedef AudioFileSourceHTTPStreamV2   MyHttpFileSource;
 
 
@@ -475,22 +461,6 @@ void setup()
   delay(2000);
   Serial.printf("version: %s, build: %s\n", BUILD_VERSION, BUILD_TIME);
   NVSetting::load_setting();
-  /*
-  if(NVSetting::get_erase_on_boot()){
-    nvs_flash_erase();
-    Serial.println("nvs_flash_erase on boot ... ");
-    delay(1000);
-    ESP.restart();
-  }else{
-    NVSetting::set_erase_on_boot(1);
-    int times = 3;
-    while(times--){
-      yield_wait(1000);
-      Serial.println("... reboot device now, will erase a2dp.config ...");
-    }
-    NVSetting::set_erase_on_boot(0);
-  }
-  */
   ImprovSerial::begin(&cb);
 
   __monitor.loop();
@@ -541,6 +511,12 @@ void setup()
   }
   #else
   WiFi.setSleep(false);
+  int times = 3;
+  while(times--){
+    yield_wait(1000);
+    XNetController::req_utc();
+    XNetController::loop();
+  }
   #endif // ESP32_A2DP_SOURCE
 
   // install app-check-timer

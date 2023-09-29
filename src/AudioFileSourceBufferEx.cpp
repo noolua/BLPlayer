@@ -126,16 +126,19 @@ uint32_t AudioFileSourceBufferEx::read(void *data, uint32_t len)
     cb.st(STATUS_UNDERFLOW, PSTR("Buffer underflow"));
   }
 
-  fill();
+  // fill();
 
   return bytes;
 }
 
 void AudioFileSourceBufferEx::fill()
 {
-  int window_sz = 1024;
-  if(buffSize >= 8192)
-    window_sz = 4096;
+  int window_sz = 0;
+  int base_wnd_sz = buffSize >= 16384 ? 4096 : 2048;
+
+  window_sz = (int(buffSize) - int(length)) - base_wnd_sz;
+  window_sz = window_sz < base_wnd_sz ? base_wnd_sz : window_sz;
+
   if (!buffer) return;
 
   if (length < buffSize && (buffSize - length) > window_sz ) {
@@ -171,15 +174,16 @@ void AudioFileSourceBufferEx::fill()
 bool AudioFileSourceBufferEx::loop()
 {
   if (!src->loop()) return false;
-  /*
-  int times = 6;
-  while(length < buffSize && times--){
+  // /*
+#if CONFIG_IDF_TARGET_ESP32C3  
+  int times = 2;
+#else
+  int times = 1;
+#endif 
+  while(times--){
     esp_rom_delay_us(100);
     fill();
-    yield();
   }
-  */
-  fill();
   return true;
 }  
 

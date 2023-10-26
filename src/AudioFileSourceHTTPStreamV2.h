@@ -13,7 +13,7 @@
 
 class AudioFileSourceHTTPStreamV2 : public AudioFileSource {
   public:
-    AudioFileSourceHTTPStreamV2(const char *url);
+    AudioFileSourceHTTPStreamV2(const char *url, bool fill_body=false);
     virtual ~AudioFileSourceHTTPStreamV2() override;
 
     virtual bool open(const char *url) override;
@@ -25,8 +25,12 @@ class AudioFileSourceHTTPStreamV2 : public AudioFileSource {
     virtual uint32_t getSize() override;
     virtual uint32_t getPos() override;
   private:
+    bool _try_fill_body();
     esp_http_client_handle_t _client;
     uint32_t _pos;
+    bool _fill_body;
+    uint8_t *_body;
+    uint32_t _body_sz;
 };
 
 #endif

@@ -41,7 +41,6 @@ class AudioFileSourceBufferEx : public AudioFileSource
     int monitor_message(char *message, int message_len){
       return snprintf(message, message_len, ", stream: (%uKB, %5u)", buffSize/1024, length);
     }
-
     enum { STATUS_FILLING=2, STATUS_UNDERFLOW };
 
   private:

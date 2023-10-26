@@ -367,7 +367,9 @@ static ezButton button(BOOT_PIN);
 static AudioGenerator *audio_aac;
 static AudioFileSource *file;
 static AudioFileSource *srcbuffer;
-static char audio_url[1024] = {0};
+static const char *audio_url = "";
+static char audio_from_server[512] = {0};
+static char audio_from_bakup[512] = {0};
 static uint64_t audio_url_expired = 0, _last_udp_msg_timestamp = 0;
 static uint32_t digital_token_sz = 0;
 static char digital_token[32] = {0};
@@ -375,8 +377,15 @@ static char digital_token[32] = {0};
 static int main_xnet_message_handler(const xnet_message_t *msg){
   switch(msg->_opcode){
     case XNET_ACK_MUSIC_NEXT:{
-      strncpy(audio_url, (const char*)msg->_payload, msg->_payload_sz);
+      if(msg->_wparam == 0){
+        memset(audio_from_bakup, 0, sizeof(audio_from_bakup));
+        strncpy(audio_from_bakup, (const char*)msg->_payload, msg->_payload_sz);
+        // Serial.printf("bakup: %s\n", audio_from_bakup);
+      }
+      memset(audio_from_server, 0, sizeof(audio_from_server));
+      strncpy(audio_from_server, (const char*)msg->_payload, msg->_payload_sz);
       // Serial.printf("recv url: %s\n", audio_url);
+      audio_url = audio_from_server;
       audio_url_expired = millis() + 3000;
       if(audio_aac) audio_aac->stop();
     }
@@ -613,14 +622,25 @@ void loop() {
       srcbuffer = NULL;
       audio_aac = NULL;
       if(audio_url_expired < millis()){
-        audio_url[0] = 0;
+        audio_url = "";
         Serial.printf("music done, try next ...\n");
       }else{
         Serial.printf("music change ... \n");
       }
       delay(100);
     }else{
-      if (!audio_aac->loop()) audio_aac->stop();
+      if (!audio_aac->loop()){
+        audio_aac->stop();
+        if(strcmp(audio_from_server, audio_from_bakup) != 0 && audio_from_bakup[0] != 0){
+          memcpy(audio_from_server, audio_from_bakup, sizeof(audio_from_server));
+          audio_url = audio_from_server;
+          audio_url_expired = ts_now + 3000;
+          // Serial.printf("restore: %s\n", audio_url);          
+        }else{
+          audio_from_server[0] = 0;
+          audio_from_bakup[0] = 0;
+        }
+      }
     }
   }else{
     if(digital_token_sz > 0){

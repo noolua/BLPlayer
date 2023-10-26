@@ -24,7 +24,7 @@ typedef struct xnet_message_t{
 #define XNET_REQ_DIGITAL_ACCESS     (0x0004)  // 临时数字码, 数字码是一个带有效期n分钟的访问凭证，通过该数字码可以在浏览器页面上临时管理该设备，数字码不同于访问码，数字码只能物理按键触发，数字码的相关操作被视作所有者的行为。
 
 #define XNET_ACK_TIMESTAMP          (0x8000)  // 返回世界时间UTC, _payload中存放(uint64_t)类型的timestamp
-#define XNET_ACK_MUSIC_NEXT         (0x8001)  // 播放下一首歌, _payload中存放music'url
+#define XNET_ACK_MUSIC_NEXT         (0x8001)  // 播放下一首歌, _payload中存放music'url, wparam为0表示正常音频，为1表示闹钟音频。当正常播放的音频被闹钟音频打断时，闹钟音频结束后会尝试恢复到之前正常播放的音频上。
 #define XNET_ACK_PLAYER_STATE       (0x8002)  // 音量uparam(0-100), 暂停/播放状态wparam, 0播放, 1暂停
 #define XNET_ACK_DIGITAL_ACCESS     (0x8003)  // 临时数字码, 以':'为前缀的6位数字，例如':873423', 此处的':'代表起始符，存放在_playload中
 

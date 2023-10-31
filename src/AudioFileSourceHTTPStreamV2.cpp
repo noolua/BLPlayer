@@ -1,6 +1,12 @@
 #if defined(ESP32) || defined(ESP8266)
 
 #include "AudioFileSourceHTTPStreamV2.h"
+#ifdef CONFIG_ESP_HTTP_CLIENT_ENABLE_HTTPS
+#include "assets/ca_bundle.h"
+#include "esp_crt_bundle.h"
+#endif
+
+bool AudioFileSourceHTTPStreamV2::_ca_bundle_inited = false;
 
 AudioFileSourceHTTPStreamV2::AudioFileSourceHTTPStreamV2(const char *url, bool fill_body){
   _pos = 0;
@@ -26,13 +32,23 @@ bool AudioFileSourceHTTPStreamV2::open(const char *url){
     .url = url,
     .timeout_ms = 25000,            // connect timeout 25 seconds
     .buffer_size = RX_BUFFER_SZ,    // recv buffer > mtu ~ 1500 bytes
+#ifdef CONFIG_ESP_HTTP_CLIENT_ENABLE_HTTPS    
+    .crt_bundle_attach = arduino_esp_crt_bundle_attach,
+#else
     .is_async = true,
+#endif
   };
+#ifdef CONFIG_ESP_HTTP_CLIENT_ENABLE_HTTPS    
+  if(!_ca_bundle_inited){
+    _ca_bundle_inited = true;
+    arduino_esp_crt_bundle_set(x509_crt_bundle);
+  }
+#endif
   _client = esp_http_client_init(&config);
   if(_client){
     esp_err_t err = esp_http_client_open(_client, 0);
     if(err != ESP_OK){
-      Serial.println("esp_http_client_open error");
+      Serial.printf("esp_http_client_open error: 0x%x, %s\n", err, esp_err_to_name(err));
       return false;
     }
     err = esp_http_client_fetch_headers(_client);

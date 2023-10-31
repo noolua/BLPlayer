@@ -25,6 +25,7 @@ class AudioFileSourceHTTPStreamV2 : public AudioFileSource {
     virtual uint32_t getSize() override;
     virtual uint32_t getPos() override;
   private:
+    static bool _ca_bundle_inited;
     bool _try_fill_body();
     esp_http_client_handle_t _client;
     uint32_t _pos;

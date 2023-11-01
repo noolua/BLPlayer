@@ -13,6 +13,7 @@ AudioFileSourceHTTPStreamV2::AudioFileSourceHTTPStreamV2(const char *url, bool f
   _fill_body = fill_body;
   _body = NULL;
   _body_sz = 0;
+  _client = NULL;
   open(url);
 }
 
@@ -153,6 +154,13 @@ bool AudioFileSourceHTTPStreamV2::seek(int32_t pos, int dir){
 }
 
 bool AudioFileSourceHTTPStreamV2::close(){
+  if(_fill_body && _body && _body_sz > 0){
+    if(_body){
+      free(_body);
+      _body = NULL;      
+    }
+    _body_sz = 0;
+  }
   if(_client){
     esp_http_client_close(_client);
     esp_http_client_cleanup(_client);
@@ -162,10 +170,16 @@ bool AudioFileSourceHTTPStreamV2::close(){
 }
 
 bool AudioFileSourceHTTPStreamV2::isOpen(){
+  if(_fill_body && _body && _body_sz > 0){
+    return true;
+  }
   return _client ? true : false;
 }
 
 uint32_t AudioFileSourceHTTPStreamV2::getSize(){
+  if(_fill_body && _body && _body_sz > 0){
+    return _body_sz;
+  }
   if(_client)
     return esp_http_client_is_chunked_response(_client) ? 0x7FFFFFFF : esp_http_client_get_content_length(_client);
   return 0;
@@ -204,6 +218,11 @@ bool AudioFileSourceHTTPStreamV2::_try_fill_body(){
     }
   }
 ERR_CLEANUP:
+  if(_client){
+    esp_http_client_close(_client);
+    esp_http_client_cleanup(_client);
+    _client = NULL;
+  }
   if(content_length > 0 && content_length == wrote_length){
     _body_sz = content_length;
     Serial.printf("http client body size: %u\n", _body_sz);

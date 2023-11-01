@@ -4,6 +4,10 @@
 #ifdef CONFIG_ESP_HTTP_CLIENT_ENABLE_HTTPS
 #include "assets/ca_bundle.h"
 #include "esp_crt_bundle.h"
+#if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(2, 0, 6)
+#define esp_crt_bundle_attach arduino_esp_crt_bundle_attach
+#define esp_crt_bundle_set arduino_esp_crt_bundle_set 
+#endif
 #endif
 
 bool AudioFileSourceHTTPStreamV2::_ca_bundle_inited = false;
@@ -34,7 +38,7 @@ bool AudioFileSourceHTTPStreamV2::open(const char *url){
     .timeout_ms = 25000,            // connect timeout 25 seconds
     .buffer_size = RX_BUFFER_SZ,    // recv buffer > mtu ~ 1500 bytes
 #ifdef CONFIG_ESP_HTTP_CLIENT_ENABLE_HTTPS    
-    .crt_bundle_attach = arduino_esp_crt_bundle_attach,
+    .crt_bundle_attach = esp_crt_bundle_attach,
 #else
     .is_async = true,
 #endif
@@ -42,7 +46,7 @@ bool AudioFileSourceHTTPStreamV2::open(const char *url){
 #ifdef CONFIG_ESP_HTTP_CLIENT_ENABLE_HTTPS    
   if(!_ca_bundle_inited){
     _ca_bundle_inited = true;
-    arduino_esp_crt_bundle_set(x509_crt_bundle);
+    esp_crt_bundle_set(x509_crt_bundle);
   }
 #endif
   _client = esp_http_client_init(&config);

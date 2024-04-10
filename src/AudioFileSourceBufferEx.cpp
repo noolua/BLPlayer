@@ -38,8 +38,10 @@ AudioFileSourceBufferEx::AudioFileSourceBufferEx(AudioFileSource *source, uint32
 
 AudioFileSourceBufferEx::~AudioFileSourceBufferEx()
 {
-  free(buffer);
-  buffer = NULL;
+  if(buffer){
+    free(buffer);
+    buffer = NULL;
+  }
 }
 
 bool AudioFileSourceBufferEx::seek(int32_t pos, int dir)
@@ -58,8 +60,10 @@ bool AudioFileSourceBufferEx::seek(int32_t pos, int dir)
 
 bool AudioFileSourceBufferEx::close()
 {
-  free(buffer);
-  buffer = NULL;
+  if(buffer){
+    free(buffer);
+    buffer = NULL;
+  }
   return src->close();
 }
 

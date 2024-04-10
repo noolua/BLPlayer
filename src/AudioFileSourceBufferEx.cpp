@@ -63,8 +63,9 @@ bool AudioFileSourceBufferEx::close()
   if(buffer){
     free(buffer);
     buffer = NULL;
+    return src->close();
   }
-  return src->close();
+  return true;
 }
 
 bool AudioFileSourceBufferEx::isOpen()

@@ -63,7 +63,7 @@ bool AudioFileSourceBufferEx::close()
   if(buffer){
     free(buffer);
     buffer = NULL;
-    return src->close();
+    // return src->close();
   }
   return true;
 }
@@ -186,7 +186,7 @@ bool AudioFileSourceBufferEx::loop()
   int times = 1;
 #endif 
   while(times--){
-    esp_rom_delay_us(100);
+    // esp_rom_delay_us(100);
     fill();
   }
   return true;

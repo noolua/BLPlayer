@@ -22,6 +22,7 @@ typedef struct xnet_message_t{
 #define XNET_REQ_NEW_MUSIC          (0x0002)  // 设备请求新的music, uparam为0表示当前频道的曲目，uparam为1表示新频道的曲目
 #define XNET_REQ_UPDATE_STATE       (0x0003)  // 主动更新PLAYER状态到服务端, 用户使用按钮后的播放器状态应该主动推送给服务端保存, 为播放器重启后可以继续, 音量uparam(0-100), 暂停状态wparam,0播放,1暂停
 #define XNET_REQ_DIGITAL_ACCESS     (0x0004)  // 临时数字码, 数字码是一个带有效期n分钟的访问凭证，通过该数字码可以在浏览器页面上临时管理该设备，数字码不同于访问码，数字码只能物理按键触发，数字码的相关操作被视作所有者的行为。
+#define XNET_REQ_PARSE_NTAG21X      (0x0005)  // 请求解析NTAG21x数据, NTAG电子标签中的数据, 可能是播放歌曲, 也可能是控制设备音量.
 
 #define XNET_ACK_TIMESTAMP          (0x8000)  // 返回世界时间UTC, _payload中存放(uint64_t)类型的timestamp
 #define XNET_ACK_MUSIC_NEXT         (0x8001)  // 播放下一首歌, _payload中存放music'url, wparam为0表示正常音频，为1表示闹钟音频。当正常播放的音频被闹钟音频打断时，闹钟音频结束后会尝试恢复到之前正常播放的音频上。
@@ -52,6 +53,8 @@ class XNetController{
   static void req_update_state(uint16_t volume, bool pause);
   // 请求临时性的数字码
   static void req_digital_access();
+  // 请求解析NTAG21X数据
+  static void req_parse_ntag21x(const uint8_t *data, uint16_t data_len);
 };
 
 

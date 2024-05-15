@@ -27,8 +27,8 @@ typedef struct xnet_entity_t{
   xnet_entity_t(u_int16_t opcode){
     build_header(opcode);
   }
-  void build_header(uint16_t opcode, uint16_t uparam=0, uint16_t wparam=0, uint16_t payload_sz=0){
-    _header._frame_sz = sizeof(struct xnet_entity_t) + payload_sz;
+  void build_header(uint16_t opcode, uint16_t uparam=0, uint16_t wparam=0, const uint8_t *payload=NULL, uint16_t payload_sz=0){
+    _header._frame_sz = sizeof(xnet_header_t) + sizeof(xnet_message_t) + payload_sz;
     _header._magic = FRAME_MAGIX;
     _header._signature = 0U;
     _header._timestamp = 0U;
@@ -36,6 +36,9 @@ typedef struct xnet_entity_t{
     _message._uparam = uparam;
     _message._wparam = wparam;
     _message._payload_sz = payload_sz;
+    if(payload && payload_sz > 0){
+      memcpy(_message._payload, payload, payload_sz);
+    }
     memset(_header._unique_id, 0, sizeof(_header._unique_id));
     esp_efuse_mac_get_default(_header._unique_id);    
   }
@@ -150,6 +153,16 @@ void XNetController::req_update_state(uint16_t volume, bool pause){
 void XNetController::req_digital_access(){
   xnet_entity_t frame(XNET_REQ_DIGITAL_ACCESS);
   _xnet_send_frame(&frame);
+}
+
+void XNetController::req_parse_ntag21x(const uint8_t *data, uint16_t data_len){
+  uint8_t *buffer = (uint8_t*)malloc(sizeof(xnet_entity_t) + data_len);
+  if(buffer){
+    xnet_entity_t *frame = (xnet_entity_t*)buffer;
+    frame->build_header(XNET_REQ_PARSE_NTAG21X, 0, 0, data, data_len);
+    _xnet_send_frame(frame);
+    free(buffer);
+  }
 }
 
 uint64_t XNetController::utc(){

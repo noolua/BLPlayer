@@ -26,7 +26,7 @@
 AudioFileSourceBufferEx::AudioFileSourceBufferEx(AudioFileSource *source, uint32_t buffSizeBytes)
 {
   buffSize = buffSizeBytes;
-  buffer = (uint8_t*)malloc(sizeof(uint8_t) * buffSize);
+  buffer = (uint8_t*)heap_caps_malloc(sizeof(uint8_t) * buffSize, MALLOC_CAP_32BIT | MALLOC_CAP_DMA); 
   if (!buffer) audioLogger->printf_P(PSTR("Unable to allocate AudioFileSourceBufferEx::buffer[]\n"));
   writePtr = 0;
   readPtr = 0;
@@ -39,7 +39,7 @@ AudioFileSourceBufferEx::AudioFileSourceBufferEx(AudioFileSource *source, uint32
 AudioFileSourceBufferEx::~AudioFileSourceBufferEx()
 {
   if(buffer){
-    free(buffer);
+    heap_caps_free(buffer);
     buffer = NULL;
   }
 }

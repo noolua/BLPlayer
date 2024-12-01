@@ -155,11 +155,11 @@ void XNetController::req_digital_access(){
   _xnet_send_frame(&frame);
 }
 
-void XNetController::req_parse_ntag21x(const uint8_t *data, uint16_t data_len){
+void XNetController::req_parse_ntag21x(const uint8_t *data, uint16_t data_len, bool immediately){
   uint8_t *buffer = (uint8_t*)malloc(sizeof(xnet_entity_t) + data_len);
   if(buffer){
     xnet_entity_t *frame = (xnet_entity_t*)buffer;
-    frame->build_header(XNET_REQ_PARSE_NTAG21X, 0, 0, data, data_len);
+    frame->build_header(XNET_REQ_PARSE_NTAG21X, immediately, 0, data, data_len);
     _xnet_send_frame(frame);
     free(buffer);
   }

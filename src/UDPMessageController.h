@@ -54,7 +54,7 @@ class XNetController{
   // 请求临时性的数字码
   static void req_digital_access();
   // 请求解析NTAG21X数据
-  static void req_parse_ntag21x(const uint8_t *data, uint16_t data_len);
+  static void req_parse_ntag21x(const uint8_t *data, uint16_t data_len, bool immediately=false);
 };
 
 
